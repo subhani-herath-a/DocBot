@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { HeartPulse, CalendarDays, Stethoscope } from 'lucide-react';
+import chatbotIcon from '../assets/chatbot_icon.png';
+import {  CalendarDays, Stethoscope } from 'lucide-react';
 
 function Home() {
   const navigate = useNavigate();
@@ -19,7 +20,15 @@ function Home() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 to-indigo-400 px-6 py-20">
       <div className="max-w-4xl text-center">
         <div className="flex justify-center mb-6">
-          <HeartPulse className="w-16 h-16 text-blue-600 animate-pulse" />
+          <a href="/" className="flex items-center mb-1 space-x-1">
+                    <button className="bg-blue-500 text-white rounded-full w-14 h-14 text-2xl shadow-lg p-0">
+                      <img 
+                        src={chatbotIcon}
+                        alt="Chatbot Icon"
+                        style={{ width: 60, height: 60, borderRadius: '50%' }}
+                      />
+                    </button>
+                  </a>
         </div>
 
         <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
