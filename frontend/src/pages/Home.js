@@ -19,7 +19,7 @@ function Home() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 to-indigo-400 px-6 py-20">
       <div className="max-w-4xl text-center">
-        <div className="flex justify-center mb-6">
+        <div className="flex justify-center mb-1">
           <a href="/" className="flex items-center mb-1 space-x-1">
                     <button className="bg-blue-500 text-white rounded-full w-14 h-14 text-2xl shadow-lg p-0">
                       <img 

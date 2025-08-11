@@ -52,17 +52,6 @@ const DashboardLayout = ({ children, userType }) => {
       {/* Sidebar */}
       <div className={`${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0`}>
         <div className="flex items-center justify-between h-16 px-6 border-b">
-           {/* <div className="flex items-center">
-                      
-          <a href="/" className="flex items-center mb-1 space-x-1 bg-blue-400 text-white 
-          rounded-full w-12 h-12 text-2xl shadow-lg">
-              <img
-              src={chatbotIcon}
-              alt="Chatbot Icon"
-              style={{ width: 90, height: 90, borderRadius: '50%' }}
-            />
-          </a>
-          </div>  */}
           <div className="flex flex-col items-center w-full">
             {/* Profile Info */}
             {userType === "patient"||"doctor" && (
