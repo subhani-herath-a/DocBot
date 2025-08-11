@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import chatbotIcon from '../assets/chatbot_icon.png';
 import { Link, useNavigate } from 'react-router-dom';
@@ -9,9 +10,16 @@ const Register = () => {
     lastName: '',
     email: '',
     password: '',
+    confirmPassword: '',
     role: '',
     specialty: '',
+    dob: '',
+    address: '',
+    phone: '',
   });
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const navigate = useNavigate();
 
@@ -22,9 +30,14 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const payload = { ...formData };
+      if (formData.password !== formData.confirmPassword) {
+        alert("Passwords do not match!");
+        return;
+      }
 
-      // remove specialty if not a doctor
+      const payload = { ...formData };
+      delete payload.confirmPassword;
+
       if (payload.role !== 'doctor') delete payload.specialty;
 
       const res = await axios.post('http://localhost:8080/api/auth/register', payload);
@@ -48,7 +61,7 @@ const Register = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-100 to-indigo-400 flex items-center justify-center p-4">
-      <div className="bg-white dark:bg-gray-900 shadow-xl rounded-lg w-full max-w-md p-8">
+      <div className="bg-white dark:bg-gray-900 shadow-xl rounded-lg w-full max-w-4xl p-8">
         <div className="text-center mb-6">
           <div className="flex justify-center items-center mb-2">
             <button className="bg-blue-400 text-white rounded-full w-14 h-14 text-2xl shadow-lg">
@@ -64,30 +77,28 @@ const Register = () => {
           <p className="text-sm text-gray-500 dark:text-gray-300">Join our healthcare platform</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm text-gray-700 dark:text-gray-300">First Name</label>
-              <input
-                type="text"
-                name="firstName"
-                required
-                value={formData.firstName}
-                onChange={handleChange}
-                className="mt-1 w-full p-2 rounded border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-              />
-            </div>
-            <div>
-              <label className="block text-sm text-gray-700 dark:text-gray-300">Last Name</label>
-              <input
-                type="text"
-                name="lastName"
-                required
-                value={formData.lastName}
-                onChange={handleChange}
-                className="mt-1 w-full p-2 rounded border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-              />
-            </div>
+        <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm text-gray-700 dark:text-gray-300">First Name</label>
+            <input
+              type="text"
+              name="firstName"
+              required
+              value={formData.firstName}
+              onChange={handleChange}
+              className="mt-1 w-full p-2 rounded border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+            />
+          </div>
+          <div>
+            <label className="block text-sm text-gray-700 dark:text-gray-300">Last Name</label>
+            <input
+              type="text"
+              name="lastName"
+              required
+              value={formData.lastName}
+              onChange={handleChange}
+              className="mt-1 w-full p-2 rounded border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+            />
           </div>
 
           <div>
@@ -103,18 +114,82 @@ const Register = () => {
           </div>
 
           <div>
-            <label className="block text-sm text-gray-700 dark:text-gray-300">Password</label>
+            <label className="block text-sm text-gray-700 dark:text-gray-300">Date of Birth</label>
             <input
-              type="password"
-              name="password"
+              type="date"
+              name="dob"
               required
-              value={formData.password}
+              value={formData.dob}
               onChange={handleChange}
               className="mt-1 w-full p-2 rounded border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
             />
           </div>
 
           <div>
+            <label className="block text-sm text-gray-700 dark:text-gray-300">Phone Number</label>
+            <input
+              type="tel"
+              name="phone"
+              required
+              value={formData.phone}
+              onChange={handleChange}
+              className="mt-1 w-full p-2 rounded border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm text-gray-700 dark:text-gray-300">Address</label>
+            <input
+              type="text"
+              name="address"
+              required
+              value={formData.address}
+              onChange={handleChange}
+              className="mt-1 w-full p-2 rounded border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm text-gray-700 dark:text-gray-300">Password</label>
+            <div className="relative">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                name="password"
+                required
+                value={formData.password}
+                onChange={handleChange}
+                className="mt-1 w-full p-2 rounded border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white pr-10"
+              />
+              <span
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-2 top-3 cursor-pointer text-gray-500 dark:text-gray-300 text-sm"
+              >
+                {showPassword ? '🙈' : '👁️'}
+              </span>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm text-gray-700 dark:text-gray-300">Re-Type Password</label>
+            <div className="relative">
+              <input
+                type={showConfirmPassword ? 'text' : 'password'}
+                name="confirmPassword"
+                required
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                className="mt-1 w-full p-2 rounded border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white pr-10"
+              />
+              <span
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="absolute right-2 top-3 cursor-pointer text-gray-500 dark:text-gray-300 text-sm"
+              >
+                {showConfirmPassword ? '🙈' : '👁️'}
+              </span>
+            </div>
+          </div>
+
+          <div >
             <label className="block text-sm text-gray-700 dark:text-gray-300">Role</label>
             <select
               name="role"
@@ -148,12 +223,14 @@ const Register = () => {
             </div>
           )}
 
-          <button
-            type="submit"
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded"
-          >
-            Create Account
-          </button>
+          <div className="col-span-2">
+            <button
+              type="submit"
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded"
+            >
+              Create Account
+            </button>
+          </div>
         </form>
 
         <div className="mt-6 text-center">

@@ -16,7 +16,7 @@ function Header() {
   return (
     <header className="p-1 bg-gray-900 text-white flex justify-between items-center">
       <div className="flex items-center mb-4">
-        <a href="/" className="flex items-center mb-4 space-x-4">
+        <a href="/" className="flex items-center mb-1 space-x-1">
           <button className="bg-blue-500 text-white rounded-full w-14 h-14 text-2xl shadow-lg p-0">
             <img 
               src={chatbotIcon}

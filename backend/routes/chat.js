@@ -1,36 +1,4 @@
-// const express = require('express');
-// const router = express.Router();
-// const OpenAI = require('openai');
-// const dotenv = require('dotenv');
-// const { verifyToken } = require('../middleware/auth');
 
-// dotenv.config();
-
-// const openai = new OpenAI({
-//   apiKey: process.env.OPENAI_API_KEY,
-// });
-
-// router.post('/', verifyToken, async (req, res) => {
-//   try {
-//     const prompt = req.body.prompt;
-
-//     const response = await openai.chat.completions.create({
-//       model: 'gpt-3.5-turbo',
-//       messages: [
-//         { role: 'system', content: 'You are a healthcare assistant. Answer health-related questions and help users schedule appointments.' },
-//         { role: 'user', content: prompt }
-//       ]
-//     });
-
-//     res.json({ response: response.choices[0].message.content });
-
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).send('Chatbot error');
-//   }
-// });
-
-// module.exports = router;
 const express = require('express');
 const { AzureOpenAI } = require('openai');
 const dotenv = require('dotenv');

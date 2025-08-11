@@ -48,13 +48,22 @@ router.post('/upload', verifyToken, upload.single('file'), async (req, res) => {
 
 /* ----------  GET /api/files/records ---------- */
 /* Logged-in user (patient) can fetch their records */
-router.get('/records', verifyToken, async (req, res) => {
+router.get('/records', async (req, res) => {
   try {
-    const records = await MedicalRecord.find({ patientId: req.user.id }).sort({ uploadedAt: -1 });
-    res.json(records);
+    const userId = req.user._id;
+
+    const records = await MedicalRecord.find({
+      patientId: userId,
+      type: 'doctor-upload' // only doctor-uploaded records
+    })
+      .populate('doctorId', 'firstName lastName specialty')
+      .populate('appointmentId', 'date time')
+      .sort({ uploadedAt: -1 });
+
+    res.status(200).json(records);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Error fetching records' });
+    console.error('Error fetching records:', err);
+    res.status(500).json({ message: 'Server error' });
   }
 });
 

@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import DashboardLayout from '../../layouts/DashboardLayout';
@@ -11,6 +10,7 @@ const PatientAppointments = () => {
   const [availableSlots, setAvailableSlots] = useState([]);
   const [selectedSlot, setSelectedSlot] = useState('');
   const user = JSON.parse(localStorage.getItem('user'));
+  const token = localStorage.getItem('token');
 
   useEffect(() => {
     fetchAppointments();
@@ -18,17 +18,23 @@ const PatientAppointments = () => {
 
   const fetchAppointments = () => {
     axios
-      .get(`http://localhost:8080/api/appointments/patient/${user._id}`)
+      .get(`http://localhost:8080/api/appointments/patient/${user._id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
       .then((res) => setAppointments(res.data))
       .catch((err) => console.error('Failed to load appointments', err));
   };
 
   const handleCancel = async (appointmentId) => {
     try {
-      await axios.delete(`http://localhost:8080/api/appointments/cancel/${appointmentId}`);
+      await axios.delete(`http://localhost:8080/api/appointments/${appointmentId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      alert('Appointment cancelled');
       fetchAppointments();
     } catch (error) {
       console.error('Failed to cancel appointment', error);
+      alert('Failed to cancel appointment');
     }
   };
 
@@ -43,7 +49,8 @@ const PatientAppointments = () => {
   const fetchSlots = async (doctorId, date) => {
     try {
       const res = await axios.get(
-        `http://localhost:8080/api/availability/doctor/${doctorId}/date/${date}`
+        `http://localhost:8080/api/availability/doctor/${doctorId}/date/${date}`,
+        { headers: { Authorization: `Bearer ${token}` } }
       );
       setAvailableSlots(res.data);
     } catch (err) {
@@ -60,18 +67,31 @@ const PatientAppointments = () => {
     }
   };
 
-  const handleReschedule = async () => {
-    if (!selectedSlot || !selectedDate) return;
-
+  const handleReschedule = async (appointmentId, newDate, newTime) => {
+    if (!newDate || !newTime) {
+      alert('Please select both a date and a time slot.');
+      return;
+    }
     try {
-      await axios.put(`http://localhost:8080/api/appointments/reschedule/${selectedAppointment._id}`, {
-        newDate: selectedDate,
-        newTime: selectedSlot,
-      });
+      await axios.put(
+        `http://localhost:8080/api/appointments/reschedule/${appointmentId}`,
+        { date: newDate, time: newTime },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      alert('Appointment rescheduled successfully');
       setShowModal(false);
       fetchAppointments();
     } catch (err) {
       console.error('Failed to reschedule', err);
+      if (err.response && err.response.status === 409) {
+        alert('The selected slot is already booked. Please choose another.');
+      } else {
+        alert('Failed to reschedule appointment');
+      }
     }
   };
 
@@ -134,8 +154,6 @@ const PatientAppointments = () => {
         <h2 className="text-xl font-bold mb-4">My Appointments</h2>
         {renderTable('Upcoming', appointments.filter(a => a.computedStatus === 'Upcoming'))}
         {renderTable('Finished', appointments.filter(a => a.computedStatus === 'Finished'))}
-        {renderTable('Missed', appointments.filter(a => a.computedStatus === 'Missed'))}
-        {renderTable('Cancelled', appointments.filter(a => a.status === 'Cancelled'))}
       </div>
 
       {/* Reschedule Modal */}
@@ -159,8 +177,8 @@ const PatientAppointments = () => {
             >
               <option value="">-- Select Time --</option>
               {availableSlots.map((slot, index) => (
-                <option key={index} value={slot}>
-                  {slot}
+                <option key={index} value={slot.time}>
+                  {slot.time}
                 </option>
               ))}
             </select>
@@ -173,8 +191,14 @@ const PatientAppointments = () => {
                 Cancel
               </button>
               <button
-                onClick={handleReschedule}
                 className="bg-green-500 text-white px-3 py-1 rounded"
+                onClick={() =>
+                  handleReschedule(
+                    selectedAppointment._id,
+                    selectedDate,
+                    selectedSlot
+                  )
+                }
               >
                 Confirm
               </button>

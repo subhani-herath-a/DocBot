@@ -52,18 +52,31 @@ const DashboardLayout = ({ children, userType }) => {
       {/* Sidebar */}
       <div className={`${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0`}>
         <div className="flex items-center justify-between h-16 px-6 border-b">
-          <div className="flex items-center">
+           {/* <div className="flex items-center">
                       
-          <button
-            className=" bg-blue-400 text-white rounded-full w-14 h-14 text-2xl shadow-lg">
+          <a href="/" className="flex items-center mb-1 space-x-1 bg-blue-400 text-white 
+          rounded-full w-12 h-12 text-2xl shadow-lg">
               <img
               src={chatbotIcon}
               alt="Chatbot Icon"
-              style={{ width: 60, height: 60, borderRadius: '50%' }}
+              style={{ width: 90, height: 90, borderRadius: '50%' }}
             />
-          </button>
-            <span className="text-xl font-bold text-gray-900">DocBot</span>
+          </a>
+          </div>  */}
+          <div className="flex flex-col items-center w-full">
+            {/* Profile Info */}
+            {userType === "patient"||"doctor" && (
+              <div className="mt-4 bg-blue-50 rounded-lg px-4 py-3 text-center shadow">
+                <div className="text-sm font-semibold text-gray-800">
+                  {JSON.parse(localStorage.getItem("user"))?.name || "Name"}
+                </div>
+                <div className="text-xs text-gray-500 break-all">
+                  {JSON.parse(localStorage.getItem("user"))?.email || "email@example.com"}
+                </div>
+              </div>
+            )}
           </div>
+
           <Button variant="ghost" size="sm" className="lg:hidden" onClick={() => setSidebarOpen(false)}>
             <X className="h-5 w-5" />
           </Button>
@@ -96,9 +109,9 @@ const DashboardLayout = ({ children, userType }) => {
             <Button variant="ghost" size="sm" className="lg:hidden" onClick={() => setSidebarOpen(true)}>
               <Menu className="h-5 w-5" />
             </Button>
-            <div className="hidden lg:block">
+            {/* <div className="hidden lg:block">
               <h2 className="text-lg font-semibold capitalize">{userType} Dashboard</h2>
-            </div>
+            </div> */}
             
           </div>
         </header>

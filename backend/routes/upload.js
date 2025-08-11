@@ -1,66 +1,88 @@
-// const express = require('express');
-// const multer = require('multer');
-// const path = require('path');
-// const router = express.Router();
-// const uploadController = require('../controllers/uploadController');
 
-// // Set up Multer
-// const storage = multer.diskStorage({
-//   destination: function (req, file, cb) {
-//     cb(null, 'uploads/');
-//   },
-//   filename: function (req, file, cb) {
-//     cb(null, Date.now() + '-' + file.originalname);
-//   },
-// });
-
-// const upload = multer({ storage });
-
-// // POST: Upload record
-// router.post('/', upload.single('file'), uploadController.uploadMedicalRecord);
-
-// // GET: Patient's own records (token must include user ID)
-// router.get('/records', async (req, res) => {
-//   const token = req.headers.authorization?.split(' ')[1];
-//   const jwt = require('jsonwebtoken');
-//   try {
-//     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-//     const userId = decoded.id;
-//     const records = await require('../models/MedicalRecord').find({ patientId: userId });
-//     res.json(records);
-//   } catch (err) {
-//     res.status(401).json({ message: 'Unauthorized', error: err.message });
-//   }
-// });
-
-// // GET: Serve file
-// router.get('/:filename', (req, res) => {
-//   const filePath = path.join(__dirname, '..', 'uploads', req.params.filename);
-//   res.download(filePath);
-// });
-
-// // GET: Doctor uploads
-// router.get('/doctor/:doctorId', uploadController.getRecordsByDoctor);
-
-// module.exports = router;
 const express = require('express');
+const router = express.Router();
 const multer = require('multer');
 const path = require('path');
-const router = express.Router();
-const controller = require('../controllers/medicalRecordController');
+const Appointment = require('../models/Appointment');
+const MedicalRecord = require('../models/MedicalRecord');
+const { verifyToken } = require('../middleware/auth');
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, 'uploads/'),
-  filename: (req, file, cb) => cb(null, Date.now() + '-' + file.originalname),
+  filename: (req, file, cb) => {
+    const uniqueName = Date.now() + '-' + file.originalname;
+    cb(null, uniqueName);
+  }
 });
 
 const upload = multer({ storage });
 
-router.post('/', upload.single('file'), controller.uploadMedicalRecord);
-router.get('/doctor/:doctorId', controller.getRecordsByDoctor);
-router.get('/:filename', (req, res) => {
-  const filePath = path.join(__dirname, '..', 'uploads', req.params.filename);
-  res.download(filePath);
+// GET records for logged-in patient
+router.get('/records', verifyToken, async (req, res) => {
+  try {
+    const patientId = req.user.id;
+
+    const records = await MedicalRecord.find({ patientId })
+      .populate('appointmentId', 'date time')
+      .populate('doctorId', 'firstName lastName specialty')
+      .sort({ uploadedAt: -1 });
+
+    res.json(records);
+  } catch (err) {
+    console.error('[Get Patient Records Error]', err);
+    res.status(500).json({ message: 'Failed to fetch records' });
+  }
+});
+
+router.post('/:appointmentId', upload.single('file'), async (req, res) => {
+  const appointmentId = req.params.appointmentId;
+
+  if (!req.file) {
+    return res.status(400).json({ message: 'No file uploaded' });
+  }
+
+  const filePath = path.join(__dirname, '..', 'uploads', req.file.filename);
+  const fileUrl = `/uploads/${req.file.filename}`;
+
+  try {
+    // 1. Save to medicalRecords
+    const record = new MedicalRecord({
+      filename: req.file.originalname,
+      filepath: filePath,
+    });
+    await record.save();
+
+    // 2. Update appointment
+    // Save the file info into File collection first
+const fileDoc = await File.create({
+  filename: req.file.filename,
+  filepath: fileUrl,
+  uploadedAt: new Date(),
+});
+
+// Now update the appointment with fileId = ObjectId
+const updatedAppointment = await Appointment.findByIdAndUpdate(
+  appointmentId,
+  {
+    fileUrl,
+    fileId: fileDoc._id, // ✅ Correct: MongoDB ObjectId
+  },
+  { new: true }
+);
+
+
+    if (!updatedAppointment) {
+      return res.status(404).json({ message: 'Appointment not found' });
+    }
+
+    res.status(200).json({
+      message: 'Upload successful',
+      fileUrl: updatedAppointment.fileUrl,
+    });
+  } catch (error) {
+    console.error('Upload error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
 });
 
 module.exports = router;

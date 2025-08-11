@@ -1,31 +1,155 @@
-// import React, { useEffect, useState } from 'react';
 
-// function DoctorPatientViewer() {
-//   const [patients, setPatients] = useState([]);
+// import React, { useEffect, useState } from 'react';
+// import axios from 'axios';
+// import DashboardLayout from '../../layouts/DashboardLayout';
+
+// const DoctorPatientViewer = () => {
+//   const [appointments, setAppointments] = useState([]);
+//   const [search, setSearch] = useState('');
+//   const [error, setError] = useState(null);
+//   const [loading, setLoading] = useState(true);
+
+//   const doctorUser = JSON.parse(localStorage.getItem('user'));
+//   const doctorEmail = doctorUser?.email;
+//   const token = localStorage.getItem('token');
 
 //   useEffect(() => {
-//     fetch('http://localhost:8080/api/users/patients', {
-//       headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
-//     })
-//       .then(res => res.json())
-//       .then(setPatients);
-//   }, []);
+//     const fetchAppointments = async () => {
+//       try {
+//         if (!token || !doctorEmail) throw new Error('Missing doctor credentials');
+
+//         // Fetch doctorId from doctors collection using email
+//         const doctorRes = await axios.get(
+//           `http://localhost:8080/api/doctors/email/${doctorEmail}`,
+//           { headers: { Authorization: `Bearer ${token}` } }
+//         );
+
+//         const doctorId = doctorRes.data._id;
+
+//         // Fetch appointments
+//         const res = await axios.get(
+//           `http://localhost:8080/api/appointments/doctor/${doctorId}`,
+//           { headers: { Authorization: `Bearer ${token}` } }
+//         );
+
+//         setAppointments(res.data);
+//       } catch (err) {
+//         console.error('Error loading appointments:', err);
+//         setError('Failed to load appointments');
+//       } finally {
+//         setLoading(false);
+//       }
+//     };
+
+//     fetchAppointments();
+//   }, [doctorEmail, token]);
+
+//   const filteredAppointments = appointments.filter((a) => {
+//     const name = `${a.patientId?.firstName || ''} ${a.patientId?.lastName || ''}`.toLowerCase();
+//     return name.includes(search.toLowerCase());
+//   });
 
 //   return (
-//     <div className="p-8">
-//       <h2 className="text-2xl mb-4">My Patients</h2>
-//       <ul>
-//         {patients.map(p => (
-//           <li key={p._id} className="mb-2 border-b pb-2">
-//             <h3 className="font-semibold">{p.name}</h3>
-//             <p>{p.email}</p>
-//             <a className="text-blue-600" href={`mailto:${p.email}`}>Contact</a>
-//           </li>
-//         ))}
-//       </ul>
-//     </div>
+//     <DashboardLayout userType="doctor">
+//       <div className="p-6">
+//         <h2 className="text-2xl font-bold mb-4">Patient Records by Appointment</h2>
+
+//         <input
+//           type="text"
+//           placeholder="Search by patient name..."
+//           className="border p-2 mb-4 w-full"
+//           value={search}
+//           onChange={(e) => setSearch(e.target.value)}
+//         />
+
+//         {error && <p className="text-red-500">{error}</p>}
+//         {loading ? (
+//           <p>Loading appointments...</p>
+//         ) : (
+//           filteredAppointments.map((a) => (
+//             <div key={a._id} className="border rounded-lg p-4 mb-4 bg-white shadow">
+//               <p className="font-semibold">
+//                 Patient: {a.patientId?.firstName} {a.patientId?.lastName}
+//               </p>
+//               <p className="text-sm">Appointment: {a.date} at {a.time}</p>
+
+//               <div className="mt-2 text-sm">
+//                 {a.fileUrl ? (
+//                   <a
+//                     href={`http://localhost:8080${a.fileUrl}`}
+//                     target="_blank"
+//                     rel="noreferrer"
+//                     className="text-blue-600 underline"
+//                   >
+//                     View/Download Uploaded File
+//                   </a>
+//                 ) : (
+//                   <span className="text-gray-500">No File</span>
+//                 )}
+//               </div>
+
+//               <form
+//                 className="mt-4"
+//                 onSubmit={async (e) => {
+//                   e.preventDefault();
+//                   const file = e.target.file.files[0];
+//                   if (!file) return alert('Please select a file first.');
+
+//                   const formData = new FormData();
+//                   formData.append('file', file);
+
+//                   const res = await fetch(`http://localhost:8080/records/upload/${a._id}`, {
+//                     method: 'POST',
+//                     headers: {
+//                       Authorization: `Bearer ${token}`,
+//                     },
+//                     body: formData,
+//                   });
+
+//                   const result = await res.json();
+
+//                   if (res.ok) {
+//                     alert('Record uploaded! ✅');
+
+//                     // ✅ Send notification to patient
+//                     await fetch('http://localhost:8080/api/notifications', {
+//                       method: 'POST',
+//                       headers: {
+//                         'Content-Type': 'application/json',
+//                         Authorization: `Bearer ${token}`
+//                       },
+//                       body: JSON.stringify({
+//                         userId: a.patientId._id,
+//                         message: `Dr. ${doctorUser.firstName} ${doctorUser.lastName} uploaded a new medical record for your appointment on ${a.date}.`
+//                       })
+//                     });
+
+//                   } else {
+//                     alert('Upload failed ❌: ' + result.message);
+//                   }
+//                 }}
+//               >
+//                 <input
+//                   type="file"
+//                   name="file"
+//                   accept="application/pdf,image/*"
+//                   className="mb-2"
+//                   required
+//                 />
+//                 <button
+//                   type="submit"
+//                   className="bg-green-600 text-white px-4 py-1 rounded hover:bg-green-700"
+//                 >
+//                   Upload Post-Consultation Record
+//                 </button>
+//               </form>
+//             </div>
+//           ))
+//         )}
+//       </div>
+//     </DashboardLayout>
 //   );
-// }
+// };
 
 // export default DoctorPatientViewer;
 import React, { useEffect, useState } from 'react';
@@ -33,79 +157,169 @@ import axios from 'axios';
 import DashboardLayout from '../../layouts/DashboardLayout';
 
 const DoctorPatientViewer = () => {
-  const [records, setRecords] = useState([]);
-  const [file, setFile] = useState(null);
-  const doctor = JSON.parse(localStorage.getItem('user'));
+  const [appointments, setAppointments] = useState([]);
+  const [search, setSearch] = useState('');
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  const doctorUser = JSON.parse(localStorage.getItem('user'));
+  const doctorEmail = doctorUser?.email;
   const token = localStorage.getItem('token');
 
   useEffect(() => {
-    if (!doctor?._id || !token) return;
+    const fetchAppointments = async () => {
+      try {
+        if (!token || !doctorEmail) throw new Error('Missing doctor credentials');
 
-    axios
-      .get(`http://localhost:8080/api/upload/doctor/${doctor._id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((res) => setRecords(res.data))
-      .catch((err) => console.error('Error loading records:', err));
-  }, [doctor, token]);
+        // Fetch doctorId from doctors collection using email
+        const doctorRes = await axios.get(
+          `http://localhost:8080/api/doctors/email/${doctorEmail}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
 
-  const handleUpload = async (e, patientId) => {
-    e.preventDefault();
-    if (!file) return alert('No file selected');
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('doctorId', doctor._id);
-    formData.append('patientId', patientId);
+        const doctorId = doctorRes.data._id;
 
-    try {
-      await axios.post('http://localhost:8080/api/upload', formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-      alert('Record uploaded');
-    } catch (err) {
-      console.error(err);
-      alert('Upload failed');
-    }
+        // Fetch appointments (with populated patient info)
+        const res = await axios.get(
+          `http://localhost:8080/api/appointments/doctor/${doctorId}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+
+        setAppointments(res.data);
+      } catch (err) {
+        console.error('Error loading appointments:', err);
+        setError('Failed to load appointments');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAppointments();
+  }, [doctorEmail, token]);
+
+  const filteredAppointments = appointments.filter((a) => {
+    const name = `${a.patientId?.firstName || ''} ${a.patientId?.lastName || ''}`.toLowerCase();
+    return name.includes(search.toLowerCase());
+  });
+
+  // Helper: calculate age from dob
+  const getAge = (dob) => {
+    if (!dob) return null;
+    const diffMs = Date.now() - new Date(dob).getTime();
+    return Math.floor(diffMs / (1000 * 60 * 60 * 24 * 365.25));
   };
 
   return (
     <DashboardLayout userType="doctor">
       <div className="p-6">
-        <h2 className="text-2xl font-bold mb-4">Patient Medical Records</h2>
-        {records.map((r) => (
-          <div key={r._id} className="border p-4 rounded mb-3">
-            <p className="font-semibold">{r.filename}</p>
-            <p className="text-sm text-gray-600">
-              Patient: {r.patientId?.firstName} {r.patientId?.lastName}
-            </p>
-            <a
-              href={`http://localhost:8080/api/files/${r.filename}`}
-              target="_blank"
-              rel="noreferrer"
-              className="text-blue-600 underline text-sm"
-            >
-              View/Download
-            </a>
-          </div>
-        ))}
+        <h2 className="text-2xl font-bold mb-4">Patient Records by Appointment</h2>
 
-        <form className="mt-6">
-          <label className="block mb-2">Upload New Record:</label>
-          <input type="file" onChange={(e) => setFile(e.target.files[0])} />
-          <button
-            className="mt-2 bg-blue-600 text-white px-4 py-1 rounded"
-            onClick={(e) => handleUpload(e, records[0]?.patientId?._id)}
-          >
-            Upload to First Patient
-          </button>
-        </form>
+        <input
+          type="text"
+          placeholder="Search by patient name..."
+          className="border p-2 mb-4 w-full"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+
+        {error && <p className="text-red-500">{error}</p>}
+        {loading ? (
+          <p>Loading appointments...</p>
+        ) : (
+          filteredAppointments.map((a) => (
+            <div key={a._id} className="border rounded-lg p-4 mb-4 bg-white shadow">
+              <p className="font-semibold">
+                Patient: {a.patientId?.firstName} {a.patientId?.lastName}
+              </p>
+
+              {/* ✅ Show Phone */}
+              {a.patientId?.phone && (
+                <p className="text-sm">Phone: {a.patientId.phone}</p>
+              )}
+
+              {/* ✅ Show Age */}
+              {a.patientId?.dob && (
+                <p className="text-sm">Age: {getAge(a.patientId.dob)} years</p>
+              )}
+
+              <p className="text-sm">Appointment: {a.date} at {a.time}</p>
+
+              <div className="mt-2 text-sm">
+                {a.fileUrl ? (
+                  <a
+                    href={`http://localhost:8080${a.fileUrl}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-blue-600 underline"
+                  >
+                    View/Download Uploaded File
+                  </a>
+                ) : (
+                  <span className="text-gray-500">No File</span>
+                )}
+              </div>
+
+              <form
+                className="mt-4"
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  const file = e.target.file.files[0];
+                  if (!file) return alert('Please select a file first.');
+
+                  const formData = new FormData();
+                  formData.append('file', file);
+
+                  const res = await fetch(`http://localhost:8080/records/upload/${a._id}`, {
+                    method: 'POST',
+                    headers: {
+                      Authorization: `Bearer ${token}`,
+                    },
+                    body: formData,
+                  });
+
+                  const result = await res.json();
+
+                  if (res.ok) {
+                    alert('Record uploaded! ✅');
+
+                    // ✅ Send notification to patient
+                    await fetch('http://localhost:8080/api/notifications', {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${token}`
+                      },
+                      body: JSON.stringify({
+                        userId: a.patientId._id,
+                        message: `Dr. ${doctorUser.firstName} ${doctorUser.lastName} uploaded a new medical record for your appointment on ${a.date}.`
+                      })
+                    });
+
+                  } else {
+                    alert('Upload failed ❌: ' + result.message);
+                  }
+                }}
+              >
+                <input
+                  type="file"
+                  name="file"
+                  accept="application/pdf,image/*"
+                  className="mb-2"
+                  required
+                />
+                <button
+                  type="submit"
+                  className="bg-green-600 text-white px-4 py-1 rounded hover:bg-green-700"
+                >
+                  Upload Post-Consultation Record
+                </button>
+              </form>
+            </div>
+          ))
+        )}
       </div>
     </DashboardLayout>
   );
 };
 
 export default DoctorPatientViewer;
-

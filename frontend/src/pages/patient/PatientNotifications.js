@@ -4,60 +4,114 @@ import DashboardLayout from '../../layouts/DashboardLayout';
 
 const PatientNotifications = () => {
   const [notifications, setNotifications] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
   const user = JSON.parse(localStorage.getItem('user'));
+  const token = localStorage.getItem('token');
 
   useEffect(() => {
     const fetchNotifications = async () => {
       try {
-        const res = await axios.get(`http://localhost:8080/api/notifications/${user._id}`);
+        if (!user?._id) return;
+
+        const res = await axios.get(`http://localhost:8080/api/notifications/${user._id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
         setNotifications(res.data);
       } catch (err) {
-        console.error('Failed to load notifications', err);
+        console.error('❌ Error fetching notifications:', err);
+        setError('Failed to fetch notifications.');
+      } finally {
+        setLoading(false);
       }
     };
 
-    if (user?._id) {
-      fetchNotifications();
-    }
-  }, [user]);
+    fetchNotifications();
+  }, [user, token]);
 
   const markAllAsRead = async () => {
     try {
-      await axios.put(`http://localhost:8080/api/notifications/mark-all-read/${user._id}`);
-      const res = await axios.get(`http://localhost:8080/api/notifications/${user._id}`);
+      await axios.put(
+        `http://localhost:8080/api/notifications/mark-all-read/${user._id}`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      // Re-fetch notifications
+      const res = await axios.get(`http://localhost:8080/api/notifications/${user._id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
       setNotifications(res.data);
     } catch (err) {
-      console.error('Error marking notifications as read', err);
+      console.error('❌ Failed to mark as read:', err);
+      alert('Could not mark notifications as read.');
     }
   };
 
+  const unread = notifications.filter((n) => !n.isRead);
+  const read = notifications.filter((n) => n.isRead);
+
   return (
     <DashboardLayout userType="patient">
-      <div className="space-y-4">
-        <h2 className="text-2xl font-bold text-gray-800">Notifications</h2>
+      <div className="p-6 max-w-4xl mx-auto">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-2xl font-bold flex items-center gap-2">
+            Notifications
+            {unread.length > 0 && (
+              <span className="bg-red-600 text-white px-2 py-0.5 text-xs rounded-full">
+                {unread.length}
+              </span>
+            )}
+          </h2>
+          {unread.length > 0 && (
+            <button
+              onClick={markAllAsRead}
+              className="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700"
+            >
+              Mark All as Read
+            </button>
+          )}
+        </div>
 
-        <button
-          onClick={markAllAsRead}
-          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-        >
-          Mark All as Read
-        </button>
-
-        {notifications.length === 0 ? (
-          <p className="text-gray-600">No notifications available.</p>
+        {loading ? (
+          <p className="text-gray-500">Loading notifications...</p>
+        ) : error ? (
+          <p className="text-red-600">{error}</p>
+        ) : notifications.length === 0 ? (
+          <p className="text-gray-600">No notifications found.</p>
         ) : (
-          <ul className="divide-y divide-gray-200">
-            {notifications.map((note) => (
-              <li key={note._id} className="py-3">
-                <div className="flex justify-between items-center">
-                  <p className={note.read ? 'text-gray-600' : 'text-black font-semibold'}>
-                    {note.message}
-                  </p>
-                  <span className="text-xs text-gray-500">{new Date(note.createdAt).toLocaleString()}</span>
-                </div>
-              </li>
-            ))}
-          </ul>
+          <>
+            {unread.length > 0 && (
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold text-blue-700 mb-2">🔵 Unread</h3>
+                <ul className="space-y-3">
+                  {unread.map((n) => (
+                    <li key={n._id} className="bg-yellow-100 p-4 rounded shadow border border-yellow-300">
+                      <div className="font-medium">{n.message}</div>
+                      <div className="text-sm text-gray-600">{new Date(n.createdAt).toLocaleString()}</div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {read.length > 0 && (
+              <div>
+                <h3 className="text-lg font-semibold text-gray-700 mb-2">⚪ Read</h3>
+                <ul className="space-y-3">
+                  {read.map((n) => (
+                    <li key={n._id} className="bg-gray-100 p-4 rounded shadow-sm border">
+                      <div>{n.message}</div>
+                      <div className="text-sm text-gray-500">{new Date(n.createdAt).toLocaleString()}</div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </>
         )}
       </div>
     </DashboardLayout>

@@ -5,7 +5,6 @@ const About = () => {
   const benefits = [
     "HIPAA-compliant security and privacy",
     "Integration with major insurance providers",
-    "Multi-language support",
     "Mobile-responsive design",
     "Real-time appointment updates",
     "Comprehensive reporting tools"

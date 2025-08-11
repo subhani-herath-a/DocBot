@@ -26,7 +26,7 @@ const Features = () => {
       icon: User,
       title: 'Complete Medical Records',
       description:
-        'Access your complete medical history, prescriptions, and test results securely in one place.',
+        'Access your complete medical records, prescriptions, and others in one place.',
     },
     {
       icon: Clock,
@@ -36,9 +36,9 @@ const Features = () => {
     },
     {
       icon: Bell,
-      title: 'Smart Reminders',
+      title: 'Notifications',
       description:
-        'Never miss an appointment with automated reminders via email, SMS, and in-app notifications.',
+        'Get instant app notifications.',
     },
     {
       icon: Settings,

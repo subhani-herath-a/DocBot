@@ -15,6 +15,8 @@ const uploadRoutes = require('./routes/upload');
 const notificationRoutes = require('./routes/notificationRoutes');
 const patientRoutes = require('./routes/patientRoutes');
 const availabilityRoutes = require('./routes/availability');
+const recordsRoutes = require('./routes/records');
+
 
 dotenv.config();
 const app = express();
@@ -22,7 +24,11 @@ const PORT = process.env.PORT || 8080;
 
 app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
 app.use(express.json());
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+app.use('/uploads', express.static('uploads'));
+
+
+// app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
@@ -35,7 +41,12 @@ app.use('/api/notifications', notificationRoutes);
 app.use('/api/patients', patientRoutes);
 app.use('/api/availability', availabilityRoutes);
 app.use('/api/admin', require('./routes/adminRoutes'));
+app.use('/records', recordsRoutes);
 
+app.get('/uploads/:filename', (req, res) => {
+  const file = path.join(__dirname, 'uploads', req.params.filename);
+  res.download(file); // forces download
+});
 
 app.get('/', (req, res) => {
   res.send('🚀 DocBot backend is running!');

@@ -1,10 +1,21 @@
+
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const Doctor = require('../models/Doctor');
 
 exports.register = async (req, res) => {
-  const { firstName, lastName, email, password, role, specialty } = req.body;
+  const { 
+    firstName, 
+    lastName, 
+    email, 
+    password, 
+    role, 
+    specialty, 
+    phone, 
+    address, 
+    dob 
+  } = req.body;
 
   try {
     const existing = await User.findOne({ email });
@@ -12,23 +23,29 @@ exports.register = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // ✅ STEP 1: Create user first
+    // ✅ Create User with all provided fields
     const user = await User.create({
       firstName,
       lastName,
       email,
       password: hashedPassword,
       role,
+      phone,
+      address,
+      dob: dob ? new Date(dob) : null
     });
 
-    // ✅ STEP 2: If doctor, create Doctor with full info
+    // ✅ If Doctor, create in Doctor collection with same fields
     if (role === 'doctor') {
       await Doctor.create({
         firstName,
         lastName,
         email,
         password: hashedPassword,
-        specialty
+        specialty,
+        phone,
+        address,
+        dob: dob ? new Date(dob) : null
       });
     }
 
@@ -38,7 +55,6 @@ exports.register = async (req, res) => {
     res.status(500).json({ msg: 'Server error', error: err.message });
   }
 };
-
 
 exports.login = async (req, res) => {
   const { email, password } = req.body;
@@ -50,7 +66,11 @@ exports.login = async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(400).json({ msg: 'Invalid credentials' });
 
-    const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '2d' });
+    const token = jwt.sign(
+      { id: user._id, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: '2d' }
+    );
 
     res.json({ token, user });
   } catch (err) {
