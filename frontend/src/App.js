@@ -18,24 +18,24 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 
 // Dashboards
-import AdminDashboard from './pages/AdminDashboard';
-import DoctorDashboard from './pages/DoctorDashboard';
-import PatientDashboard from './pages/PatientDashboard';
+import AdminDashboard from './pages/admin/AdminDashboard';
+import DoctorDashboard from './pages/doctor/DoctorDashboard';
+import PatientDashboard from './pages/patient/PatientDashboard';
 
 // Functional Pages
 import BookAppointment from './pages/BookAppointment';
-import PatientRecords from './pages/PatientRecords';
-import DoctorPatientViewer from './pages/DoctorPatientViewer';
-import DoctorAppointments from './pages/DoctorAppointments';
-import DoctorAvailability from './pages/DoctorAvailability';
-import PatientAppointments from './pages/PatientAppointments';
-import PatientNotifications from './pages/PatientNotifications';
-import PatientProfileSettings from './pages/PatientProfileSettings';
-import DoctorNotifications from './pages/DoctorNotifications';
-import DoctorProfileSettings from './pages/DoctorProfileSettings';
-import AdminUsers from './pages/AdminUsers';
-import AdminAppointments from './pages/AdminAppointments';
-import AdminSettings from './pages/AdminSettings';
+import PatientRecords from './pages/patient/PatientRecords';
+import DoctorPatientViewer from './pages/doctor/DoctorPatientViewer';
+import DoctorAppointments from './pages/doctor/DoctorAppointments';
+import DoctorAvailability from './pages/doctor/DoctorAvailability';
+import PatientAppointments from './pages/patient/PatientAppointments';
+import PatientNotifications from './pages/patient/PatientNotifications';
+import PatientProfileSettings from './pages/patient/PatientProfileSettings';
+import DoctorNotifications from './pages/doctor/DoctorNotifications';
+import DoctorProfileSettings from './pages/doctor/DoctorProfileSettings';
+import AdminUsers from './pages/admin/AdminUsers';
+import AdminAppointments from './pages/admin/AdminAppointments';
+import AdminSettings from './pages/admin/AdminSettings';
 
 function App() {
   return (

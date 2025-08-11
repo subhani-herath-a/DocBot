@@ -36,6 +36,7 @@ app.use('/api/patients', patientRoutes);
 app.use('/api/availability', availabilityRoutes);
 app.use('/api/admin', require('./routes/adminRoutes'));
 
+
 app.get('/', (req, res) => {
   res.send('🚀 DocBot backend is running!');
 });

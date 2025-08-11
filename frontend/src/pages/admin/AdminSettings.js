@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import DashboardLayout from '../layouts/DashboardLayout';
+import DashboardLayout from '../../layouts/DashboardLayout';
 
 const AdminSettings = () => {
   const [settings, setSettings] = useState({

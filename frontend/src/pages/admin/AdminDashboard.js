@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import DashboardLayout from '../layouts/DashboardLayout';
+import DashboardLayout from '../../layouts/DashboardLayout';
 import axios from 'axios';
 
 export default function AdminDashboard() {

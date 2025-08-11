@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import DashboardLayout from '../layouts/DashboardLayout';
 
-const PatientProfileSettings = () => {
+import React, { useEffect, useState } from 'react';
+import DashboardLayout from '../../layouts/DashboardLayout';
+import axios from 'axios';
+
+const DoctorProfileSettings = () => {
   const user = JSON.parse(localStorage.getItem('user'));
   const userId = user?._id;
 
@@ -10,6 +11,7 @@ const PatientProfileSettings = () => {
     firstName: '',
     lastName: '',
     email: '',
+    specialty: '',
     newPassword: '',
     confirmPassword: '',
     currentPassword: '',
@@ -22,24 +24,25 @@ const PatientProfileSettings = () => {
   useEffect(() => {
     if (!userId) return;
 
-    const fetchPatient = async () => {
+    const fetchDoctor = async () => {
       try {
-        const res = await axios.get(`http://localhost:8080/api/users/${userId}`);
+        const res = await axios.get(`http://localhost:5000/api/users/${userId}`);
         setFormData((prev) => ({
           ...prev,
           firstName: res.data.firstName || '',
           lastName: res.data.lastName || '',
           email: res.data.email || '',
+          specialty: res.data.specialty || '',
         }));
         setPreviewUrl(res.data.profilePicture || '');
         setLoading(false);
       } catch (err) {
-        console.error('Error fetching patient info:', err);
+        console.error('Error loading doctor info:', err);
         setLoading(false);
       }
     };
 
-    fetchPatient();
+    fetchDoctor();
   }, [userId]);
 
   const handleChange = (e) => {
@@ -56,11 +59,11 @@ const PatientProfileSettings = () => {
     e.preventDefault();
 
     if (!formData.currentPassword) {
-      return alert('Please enter your current password to save changes.');
+      return alert("Please enter your current password to save changes");
     }
 
     if (formData.newPassword && formData.newPassword !== formData.confirmPassword) {
-      return alert('New password and confirm password do not match.');
+      return alert("New password and confirm password do not match");
     }
 
     const updateData = {
@@ -70,6 +73,7 @@ const PatientProfileSettings = () => {
     if (formData.firstName) updateData.firstName = formData.firstName;
     if (formData.lastName) updateData.lastName = formData.lastName;
     if (formData.email) updateData.email = formData.email;
+    if (formData.specialty) updateData.specialty = formData.specialty;
     if (formData.newPassword) updateData.password = formData.newPassword;
 
     try {
@@ -81,13 +85,8 @@ const PatientProfileSettings = () => {
       }
 
       await axios.put(`http://localhost:8080/api/users/${userId}`, updateData);
-      alert('Profile updated successfully!');
-      setFormData((prev) => ({
-        ...prev,
-        newPassword: '',
-        confirmPassword: '',
-        currentPassword: '',
-      }));
+      alert('Profile updated successfully');
+      setFormData({ ...formData, newPassword: '', confirmPassword: '', currentPassword: '' });
     } catch (err) {
       alert(err.response?.data?.message || 'Failed to update profile');
     }
@@ -95,16 +94,16 @@ const PatientProfileSettings = () => {
 
   if (loading) {
     return (
-      <DashboardLayout userType="patient">
+      <DashboardLayout userType="doctor">
         <div className="p-6">Loading profile...</div>
       </DashboardLayout>
     );
   }
 
   return (
-    <DashboardLayout userType="patient">
+    <DashboardLayout userType="doctor">
       <div className="p-6 max-w-xl mx-auto bg-white rounded shadow">
-        <h2 className="text-2xl font-bold mb-6">Patient Profile Settings</h2>
+        <h2 className="text-2xl font-bold mb-6">Doctor Profile Settings</h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Profile Pic */}
@@ -118,37 +117,50 @@ const PatientProfileSettings = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">First Name</label>
+            <label className="block text-sm font-medium">First Name</label>
             <input
               type="text"
               name="firstName"
               value={formData.firstName}
               onChange={handleChange}
-              className="w-full p-2 border rounded bg-white"
+              className="mt-1 w-full p-2 border rounded"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">Last Name</label>
+            <label className="block text-sm font-medium">Last Name</label>
             <input
               type="text"
               name="lastName"
               value={formData.lastName}
               onChange={handleChange}
-              className="w-full p-2 border rounded bg-white"
+              className="mt-1 w-full p-2 border rounded"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">Email</label>
+            <label className="block text-sm font-medium">Email</label>
             <input
               type="email"
               name="email"
               value={formData.email}
               onChange={handleChange}
-              className="w-full p-2 border rounded bg-white"
+              className="mt-1 w-full p-2 border rounded"
             />
           </div>
+
+          {user?.role === 'doctor' && (
+            <div>
+              <label className="block text-sm font-medium">Specialty</label>
+              <input
+                type="text"
+                name="specialty"
+                value={formData.specialty}
+                onChange={handleChange}
+                className="mt-1 w-full p-2 border rounded"
+              />
+            </div>
+          )}
 
           <div>
             <label className="block text-sm font-medium text-red-500">Current Password *</label>
@@ -158,39 +170,35 @@ const PatientProfileSettings = () => {
               value={formData.currentPassword}
               onChange={handleChange}
               required
-              className="w-full p-2 border rounded bg-white"
-              placeholder="Required to save any changes"
+              className="mt-1 w-full p-2 border rounded"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">New Password</label>
+            <label className="block text-sm font-medium">New Password</label>
             <input
               type="password"
               name="newPassword"
               value={formData.newPassword}
               onChange={handleChange}
-              className="w-full p-2 border rounded bg-white"
+              className="mt-1 w-full p-2 border rounded"
               placeholder="Leave blank to keep current"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">Confirm New Password</label>
+            <label className="block text-sm font-medium">Confirm New Password</label>
             <input
               type="password"
               name="confirmPassword"
               value={formData.confirmPassword}
               onChange={handleChange}
-              className="w-full p-2 border rounded bg-white"
+              className="mt-1 w-full p-2 border rounded"
               placeholder="Re-enter new password"
             />
           </div>
 
-          <button
-            type="submit"
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 w-full"
-          >
+          <button type="submit" className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700">
             Save Changes
           </button>
         </form>
@@ -199,4 +207,4 @@ const PatientProfileSettings = () => {
   );
 };
 
-export default PatientProfileSettings;
+export default DoctorProfileSettings;
