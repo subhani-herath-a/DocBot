@@ -76,7 +76,7 @@ const AdminUsers = () => {
   return (
     <DashboardLayout userType="admin">
       <div>
-        <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-4">
+        <h2 className="text-2xl font-bold text-gray-800 dark:text-gray mb-4">
           Manage Users
         </h2>
 

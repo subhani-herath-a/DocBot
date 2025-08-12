@@ -1,15 +1,16 @@
+
 import React, { useState } from "react";
 import { Button } from "../components/ui/button";
-import chatbotIcon from '../assets/chatbot_icon.png';
 import {
-  Calendar, Clock, Settings, Bell ,User,
+  Calendar, Clock, Settings, Bell, User,
   Menu, X, Home
 } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 
 const DashboardLayout = ({ children, userType }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation(); // track current route
 
   const getMenuItems = () => {
     switch (userType) {
@@ -47,14 +48,24 @@ const DashboardLayout = ({ children, userType }) => {
 
   const menuItems = getMenuItems();
 
+  const isExactMatch = (href) => {
+    // Dashboard tabs should only match exactly
+    if (href === "/admin" || href === "/doctor" || href === "/patient") {
+      return location.pathname === href;
+    }
+    // Other tabs can match exact or start with subpaths
+    return location.pathname === href || location.pathname.startsWith(href + "/");
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 flex">
       {/* Sidebar */}
-      <div className={`${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0`}>
+      <div className={`${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} fixed inset-y-0 left-0 z-50 w-64
+       bg-white shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0`}>
         <div className="flex items-center justify-between h-16 px-6 border-b">
           <div className="flex flex-col items-center w-full">
             {/* Profile Info */}
-            {userType === "patient"||"doctor" && (
+            {(userType === "patient" || userType === "doctor") && (
               <div className="mt-4 bg-blue-50 rounded-lg px-4 py-3 text-center shadow">
                 <div className="text-sm font-semibold text-gray-800">
                   {JSON.parse(localStorage.getItem("user"))?.name || "Name"}
@@ -72,23 +83,33 @@ const DashboardLayout = ({ children, userType }) => {
         </div>
 
         <nav className="mt-6 px-4 space-y-2">
-          {menuItems.map((item) => (
-            <Link
-              key={item.href}
-              to={item.href}
-              className="flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors"
-              onClick={() => setSidebarOpen(false)}
-            >
-              <item.icon className="h-5 w-5 mr-3" />
-              {item.label}
-            </Link>
-          ))}
+          {menuItems.map((item) => {
+            const active = isExactMatch(item.href);
+            return (
+              <Link
+                key={item.href}
+                to={item.href}
+                className={`flex items-center px-4 py-3 rounded-lg transition-colors duration-200 ${
+                  active
+                    ? "bg-blue-500 text-white hover:bg-blue-600"
+                    : "text-gray-700 hover:bg-blue-50 hover:text-blue-600"
+                }`}
+                onClick={() => setSidebarOpen(false)}
+              >
+                <item.icon className="h-5 w-5 mr-3" />
+                {item.label}
+              </Link>
+            );
+          })}
         </nav>
       </div>
 
       {/* Overlay */}
       {sidebarOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden" onClick={() => setSidebarOpen(false)} />
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
       )}
 
       {/* Main Content */}
@@ -98,10 +119,6 @@ const DashboardLayout = ({ children, userType }) => {
             <Button variant="ghost" size="sm" className="lg:hidden" onClick={() => setSidebarOpen(true)}>
               <Menu className="h-5 w-5" />
             </Button>
-            {/* <div className="hidden lg:block">
-              <h2 className="text-lg font-semibold capitalize">{userType} Dashboard</h2>
-            </div> */}
-            
           </div>
         </header>
 

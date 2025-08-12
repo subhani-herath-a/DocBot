@@ -81,7 +81,7 @@ const Contact = () => {
                     </label>
                     <input
                       type="text"
-                      placeholder="John"
+                      placeholder=""
                       className="mt-2 w-full border border-gray-300 dark:border-gray-700 p-3 rounded bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
                     />
                   </div>
@@ -91,7 +91,7 @@ const Contact = () => {
                     </label>
                     <input
                       type="text"
-                      placeholder="Doe"
+                      placeholder=""
                       className="mt-2 w-full border border-gray-300 dark:border-gray-700 p-3 rounded bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
                     />
                   </div>
@@ -102,7 +102,7 @@ const Contact = () => {
                   </label>
                   <input
                     type="email"
-                    placeholder="john@example.com"
+                    placeholder="someone@example.com"
                     className="mt-2 w-full border border-gray-300 dark:border-gray-700 p-3 rounded bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
                   />
                 </div>

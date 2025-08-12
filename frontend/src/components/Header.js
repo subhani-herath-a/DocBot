@@ -1,10 +1,11 @@
 
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom'; // <-- import useLocation
 import chatbotIcon from '../assets/chatbot_icon.png';
 
 function Header() {
   const navigate = useNavigate();
+  const location = useLocation(); // get current path
   const isLoggedIn = !!localStorage.getItem('token');
   const user = JSON.parse(localStorage.getItem('user'));
   const [menuOpen, setMenuOpen] = useState(false);
@@ -14,28 +15,65 @@ function Header() {
     navigate('/login');
   };
 
+  // Helper to check if link is active
+  const isActive = (path) => {
+    // For root, exact match; otherwise, startsWith to cover subpaths if needed
+    if (path === '/') return location.pathname === '/';
+    return location.pathname.startsWith(path);
+  };
+
+  // Common classes for links
+  const baseLinkClasses = "mx-3 text-xl";
+  const activeLinkClasses = "text-blue-600 font-semibold border-b-2 border-blue-600";
+  const inactiveLinkClasses = "hover:text-blue-600";
+
+  // For mobile links
+  const mobileBaseClasses = "block px-3 py-1 rounded";
+  const mobileActiveClasses = "text-blue-600 font-semibold bg-blue-100";
+  const mobileInactiveClasses = "hover:text-blue-600";
+
   return (
     <header className="p-2 bg-gray-900 text-white">
       <div className="flex justify-between items-center">
         <div className="flex items-center mb-4">
-        <a href="/" className="flex items-center mb-1 space-x-1">
-           <button className="bg-blue-500 text-white rounded-full w-14 h-14 text-2xl shadow-lg p-0">
-             <img 
-               src={chatbotIcon}
-               alt="Chatbot Icon"
-               style={{ width: 60, height: 60, borderRadius: '50%' }}
-             />
-           </button>
-           <span className="text-2xl font-bold">DocBot</span>
-         </a>
-       </div>
+          <a href="/" className="flex items-center mb-1 space-x-1">
+            <button className="bg-blue-500 text-white rounded-full w-14 h-14 text-2xl shadow-lg p-0">
+              <img 
+                src={chatbotIcon}
+                alt="Chatbot Icon"
+                style={{ width: 60, height: 60, borderRadius: '50%' }}
+              />
+            </button>
+            <span className="text-2xl font-bold">DocBot</span>
+          </a>
+        </div>
 
         {/* Desktop Nav */}
         <nav className="hidden md:flex items-center">
-          <Link to="/" className="hover:text-blue-600 mx-3 text-xl">Home</Link>
-          <Link to="/about" className="hover:text-blue-600 mx-3 text-xl">About</Link>
-          <Link to="/features" className="hover:text-blue-600 mx-3 text-xl">Features</Link>
-          <Link to="/contact" className="hover:text-blue-600 mx-3 text-xl">Contact</Link>
+          <Link
+            to="/"
+            className={`${baseLinkClasses} ${isActive('/') ? activeLinkClasses : inactiveLinkClasses}`}
+          >
+            Home
+          </Link>
+          <Link
+            to="/about"
+            className={`${baseLinkClasses} ${isActive('/about') ? activeLinkClasses : inactiveLinkClasses}`}
+          >
+            About
+          </Link>
+          <Link
+            to="/features"
+            className={`${baseLinkClasses} ${isActive('/features') ? activeLinkClasses : inactiveLinkClasses}`}
+          >
+            Features
+          </Link>
+          <Link
+            to="/contact"
+            className={`${baseLinkClasses} ${isActive('/contact') ? activeLinkClasses : inactiveLinkClasses}`}
+          >
+            Contact
+          </Link>
 
           {!isLoggedIn ? (
             <Link
@@ -77,10 +115,34 @@ function Header() {
         }`}
       >
         <div className="bg-gray-800 rounded-lg shadow-lg p-3 space-y-2">
-          <Link to="/" className="block hover:text-blue-600" onClick={() => setMenuOpen(false)}>Home</Link>
-          <Link to="/about" className="block hover:text-blue-600" onClick={() => setMenuOpen(false)}>About</Link>
-          <Link to="/features" className="block hover:text-blue-600" onClick={() => setMenuOpen(false)}>Features</Link>
-          <Link to="/contact" className="block hover:text-blue-600" onClick={() => setMenuOpen(false)}>Contact</Link>
+          <Link
+            to="/"
+            className={`${mobileBaseClasses} ${isActive('/') ? mobileActiveClasses : mobileInactiveClasses}`}
+            onClick={() => setMenuOpen(false)}
+          >
+            Home
+          </Link>
+          <Link
+            to="/about"
+            className={`${mobileBaseClasses} ${isActive('/about') ? mobileActiveClasses : mobileInactiveClasses}`}
+            onClick={() => setMenuOpen(false)}
+          >
+            About
+          </Link>
+          <Link
+            to="/features"
+            className={`${mobileBaseClasses} ${isActive('/features') ? mobileActiveClasses : mobileInactiveClasses}`}
+            onClick={() => setMenuOpen(false)}
+          >
+            Features
+          </Link>
+          <Link
+            to="/contact"
+            className={`${mobileBaseClasses} ${isActive('/contact') ? mobileActiveClasses : mobileInactiveClasses}`}
+            onClick={() => setMenuOpen(false)}
+          >
+            Contact
+          </Link>
 
           {!isLoggedIn ? (
             <Link
